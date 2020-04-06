@@ -1,0 +1,13 @@
+export const SET_CONFIRMED = 'SET_CONFIRMED'
+export const SET_RECOVERED = 'SET_RECOVERED'
+export const SET_DEATH = 'SET_DEATH'
+export const SET_DATE = 'SET_DATE'
+export const SET_GLOBAL_LOADING = 'SET_GLOBAL_LOADING'
+
+export const SET_COUNTRIES = 'SET_COUNTRIES'
+export const SET_COUNTRIES_LOADING = 'SET_COUNTRIES_LOADING'
+
+export const SET_CASES = 'SET_CASES'
+export const SET_COUNTRY_CODE = 'SET_COUNTRY_CODE'
+export const SET_FOUND = 'SET_FOUND'
+export const SET_LOADING = 'SET_LOADING'
