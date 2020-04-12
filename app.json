@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "HelloWorld",
+    "name": "CovidMonitor",
     "slug": "covid-react-native",
     "platforms": [
       "ios",

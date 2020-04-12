@@ -8,7 +8,9 @@ import {
     Image
 } from 'react-native';
 import axios from 'axios'
-import { LineChart, PieChart } from 'react-native-chart-kit'
+import { PieChart } from 'react-native-chart-kit'
+import * as Progress from 'react-native-progress'
+
 
 export default function Home() {
     //COUNTRIES
@@ -70,25 +72,40 @@ export default function Home() {
         pieData.push({
             name: 'confirmed',
             population: cases.confirmed.value,
-            color: 'rgba(0, 204, 0)',
+            color: 'rgb(60,179,113)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
         })
         pieData.push({
             name: 'recovered',
             population: cases.recovered.value,
-            color: 'rgba(25, 181, 254)',
+            color: 'rgb(0,191,255)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
         })
         pieData.push({
             name: 'deaths',
             population: cases.deaths.value,
-            color: 'rgba(255, 0, 0)',
+            color: 'rgb(255,69,0)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
         })
         return pieData
+    }
+
+    //dateFormatting
+    const dateFormat = (data) => {
+        let input = new Date(data)
+        let monthList = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        let year = input.getFullYear();
+        let month = ("0" + (input.getMonth() + 1)).slice(-2);
+        let day = ("0" + input.getDate()).slice(-2);
+
+        let hours = ("0" + input.getHours()).slice(-2);
+        let minutes = ("0" + input.getMinutes()).slice(-2);
+
+        return `${day} ${monthList[Number(month) - 1]} ${year}`
     }
 
     return (
@@ -96,7 +113,8 @@ export default function Home() {
             {
                 (countryLoading || loading) ?
                     <View>
-                        <Image source={require('../../assets/covid.gif')} />
+                        <Text style={{ textAlign: "center" }}>loading, please wait...</Text>
+                        <Progress.Bar animated={true} indeterminate width={200} />
                     </View>
                     :
                     <View>
@@ -108,7 +126,7 @@ export default function Home() {
                                 return (<Picker.Item label={item} value={item} key={index} />)
                             })}
                         </Picker>
-                        <Text>Last Update: {date.substring(0, 10)}</Text>
+                        <Text>Last Update: {dateFormat(date)}</Text>
                         <View>
                             {
                                 (!found) ?

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Provider } from 'react-redux'
 import store from './src/store/index'
@@ -10,7 +10,6 @@ import store from './src/store/index'
 import Home from './src/views/Home'
 import Chart from './src/views/Chart'
 import Rank from './src/views/Rank'
-import Untitled from './src/views/Untitled'
 
 console.disableYellowBox = true;
 
@@ -57,9 +56,7 @@ export default function App() {
     <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName='Homescreen' screenOptions={{ headerShown: false }}>
-          {/* <Stack.Navigator initialRouteName='Home'> */}
           <Stack.Screen name='HomeScreen' component={Homescreen} />
-          <Stack.Screen name='Untitled' component={Untitled} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

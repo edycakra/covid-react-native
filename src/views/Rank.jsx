@@ -5,14 +5,15 @@ import {
     View,
     Platform,
     StatusBar,
-    ScrollView,
-    Image
+    ScrollView
 } from 'react-native';
 import {
     Table,
     Row,
     Rows
 } from 'react-native-table-component';
+import * as Progress from 'react-native-progress'
+
 import axios from 'axios'
 
 export default function Rank() {
@@ -24,18 +25,6 @@ export default function Rank() {
     const [listCountry, setListCountry] = useState([])
     const [countryRank, setCountryRank] = useState([])
     const [loading, setLoading] = useState(false)
-    const [rankLoading, setRankLoading] = useState(false)
-
-    useEffect(() => {
-        axios.get(`https://covid19.mathdro.id/api`)
-            .then(({ data }) => {
-                setConfirmed(data.confirmed.value)
-                setRecovered(data.recovered.value)
-                setDeath(data.deaths.value)
-                setDate(data.lastUpdate)
-            })
-            .catch(console.log)
-    }, [])
 
     //COUNTRIES
     useEffect(() => {
@@ -83,7 +72,6 @@ export default function Rank() {
         input.sort(function (a, b) {
             return a[1].confirmed.value - b[1].confirmed.value;
         });
-
         return input.reverse()
     }
 
@@ -100,19 +88,45 @@ export default function Rank() {
         }
         return result
     }
+    //dateFormatting
+    const dateFormat = (data) => {
+        let input = new Date(data)
+        let monthList = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+        let year = input.getFullYear();
+        let month = ("0" + (input.getMonth() + 1)).slice(-2);
+        let day = ("0" + input.getDate()).slice(-2);
+
+        let hours = ("0" + input.getHours()).slice(-2);
+        let minutes = ("0" + input.getMinutes()).slice(-2);
+
+        return `${day} ${monthList[Number(month) - 1]} ${year} `
+    }
+
+    //GLOBAL
+    useEffect(() => {
+        axios.get(`https://covid19.mathdro.id/api`)
+            .then(({ data }) => {
+                setConfirmed(data.confirmed.value)
+                setRecovered(data.recovered.value)
+                setDeath(data.deaths.value)
+                setDate(data.lastUpdate)
+            })
+            .catch(console.log)
+    }, [])
 
     return (
         <View style={styles.container}>
             {
                 (loading) ?
                     <View>
-                        <Image source={require('../../assets/covid.gif')} />
+                        <Text style={{ textAlign: "center" }}>loading, please wait...</Text>
+                        <Progress.Bar animated={true} indeterminate width={200} />
                     </View>
                     :
                     <View style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
                         <Text>COVID-19</Text>
-                        <Text>Last Update: {date.substring(0, 10)}</Text>
+                        <Text>Last Update: {dateFormat(date)}</Text>
                         <Text>=======================================</Text>
                         <Table>
                             <Row data={['', 'Global', confirmed, recovered, death]} />
