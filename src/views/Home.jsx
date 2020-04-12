@@ -4,12 +4,9 @@ import {
     StyleSheet,
     Text,
     View,
-    Picker,
-    Dimensions
+    Image
 } from 'react-native';
 import axios from 'axios'
-import Spinner from 'react-native-loading-spinner-overlay';
-import { LineChart } from 'react-native-chart-kit'
 import { allActions } from '../store/actions';
 
 export default function Home() {
@@ -28,11 +25,16 @@ export default function Home() {
     const [date, setDate] = useState('')
     const [globalLoading, setGlobalLoading] = useState(true)
     //COUNTRIES
+    const [localConfirmed, setlocalConfirmed] = useState(0)
+    const [localRecovered, setlocalRecovered] = useState(0)
+    const [localDeath, setlocalDeath] = useState(0)
+
     const [countryLoading, setCountriesLoading] = useState(true)
     const [countries, setCountries] = useState([])
 
     //GLOBAL DATA
     useEffect(() => {
+        setGlobalLoading(true)
         axios.get(`https://covid19.mathdro.id/api`)
             .then(({ data }) => {
                 setConfirmed(data.confirmed.value)
@@ -45,34 +47,29 @@ export default function Home() {
                 setGlobalLoading(false)
             })
         // dispatch(allActions.fetchGlobal())
-    }, [dispatch])
+    }, [])
 
     //COUNTRIES
     useEffect(() => {
-        axios.get(`https://covid19.mathdro.id/api/countries`)
+        setCountriesLoading(true)
+        axios.get(`https://covid19.mathdro.id/api/countries/indonesia`)
             .then(({ data }) => {
-                let countryArr = data.countries
-                let newCountryArr = []
-                countryArr.map(el => {
-                    newCountryArr.push(el.name)
-                })
-                setCountries(newCountryArr)
+                setlocalConfirmed(data.confirmed.value)
+                setlocalRecovered(data.recovered.value)
+                setlocalDeath(data.deaths.value)
             })
             .catch(console.log)
             .finally(() => {
                 setCountriesLoading(false)
             })
-    })
+    }, [])
 
     return (
         <View style={styles.container}>
             {
                 (globalLoading || countryLoading) ?
                     <View>
-                        <Spinner
-                            visible={true}
-                            textContent={'processing, please wait...'}
-                        />
+                        <Image source={require('../../assets/covid.gif')} />
                     </View>
                     :
                     <View>
@@ -83,7 +80,11 @@ export default function Home() {
                         <Text>Confirmed {confirmed}</Text>
                         <Text>Recovered {recovered}</Text>
                         <Text>Death {death}</Text>
-                        <Text>TEST</Text>
+                        <Text>============ LOCAL ===============</Text>
+                        <Text>INDONESIA</Text>
+                        <Text>Confirmed {localConfirmed}</Text>
+                        <Text>Recovered {localRecovered}</Text>
+                        <Text>Death {localDeath}</Text>
                     </View>
             }
         </View >
@@ -93,7 +94,7 @@ export default function Home() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5FCFF',
+        backgroundColor: '#FFFFFF',
         alignItems: 'center',
         justifyContent: 'center',
     },

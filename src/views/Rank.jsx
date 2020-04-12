@@ -5,7 +5,8 @@ import {
     View,
     Platform,
     StatusBar,
-    ScrollView
+    ScrollView,
+    Image
 } from 'react-native';
 import {
     Table,
@@ -34,7 +35,7 @@ export default function Rank() {
                 setDate(data.lastUpdate)
             })
             .catch(console.log)
-    })
+    }, [])
 
     //COUNTRIES
     useEffect(() => {
@@ -105,7 +106,9 @@ export default function Rank() {
         <View style={styles.container}>
             {
                 (loading) ?
-                    <View><Text>Processing...</Text></View>
+                    <View>
+                        <Image source={require('../../assets/covid.gif')} />
+                    </View>
                     :
                     <View style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
                         <Text>COVID-19</Text>
