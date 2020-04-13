@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
-    Text,
     View,
     Picker,
     Dimensions,
-    Image
+    ActivityIndicator
 } from 'react-native';
 import axios from 'axios'
 import { PieChart } from 'react-native-chart-kit'
 import * as Progress from 'react-native-progress'
 
+import { Text } from 'galio-framework'
 
-export default function Home() {
+export default function Chart() {
     //COUNTRIES
     const [countryLoading, setCountriesLoading] = useState(false)
     const [countries, setCountries] = useState([])
@@ -26,24 +26,6 @@ export default function Home() {
     //DROPDOWN
     const [selectedValue, setSelectedValue] = useState('Indonesia')
 
-    //COUNTRIES
-    useEffect(() => {
-        setCountriesLoading(true)
-        axios.get(`https://covid19.mathdro.id/api/countries`)
-            .then(({ data }) => {
-                let countryArr = data.countries
-                let newCountryArr = []
-                countryArr.map(el => {
-                    newCountryArr.push(el.name)
-                })
-                setCountries(newCountryArr)
-            })
-            .catch(console.log)
-            .finally(() => {
-                setCountriesLoading(false)
-            })
-    }, [])
-
     //FIND DETAIL
     useEffect(() => {
         setLoading(true)
@@ -52,6 +34,7 @@ export default function Home() {
                 setCases(data)
                 setFound(true)
                 setDate(data.lastUpdate)
+                getPie()
             })
             .catch(console.log)
             .finally(() => {
@@ -70,8 +53,8 @@ export default function Home() {
     const getPie = () => {
         let pieData = []
         pieData.push({
-            name: 'confirmed',
-            population: cases.confirmed.value,
+            name: 'current',
+            population: cases.confirmed.value-(cases.recovered.value+cases.deaths.value),
             color: 'rgb(60,179,113)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
@@ -108,16 +91,38 @@ export default function Home() {
         return `${day} ${monthList[Number(month) - 1]} ${year}`
     }
 
+
+    //COUNTRIES
+    useEffect(() => {
+        setCountriesLoading(true)
+        axios.get(`https://covid19.mathdro.id/api/countries`)
+            .then(({ data }) => {
+                let countryArr = data.countries
+                let newCountryArr = []
+                countryArr.map(el => {
+                    newCountryArr.push(el.name)
+                })
+                setCountries(newCountryArr)
+            })
+            .catch(console.log)
+            .finally(() => {
+                setCountriesLoading(false)
+            })
+    }, [])
+
     return (
         <View style={styles.container}>
             {
                 (countryLoading || loading) ?
                     <View>
-                        <Text style={{ textAlign: "center" }}>loading, please wait...</Text>
-                        <Progress.Bar animated={true} indeterminate width={200} />
+                        {/* <Text style={{ textAlign: "center" }}>loading, please wait...</Text> */}
+                        {/* <Progress.Bar animated={true} indeterminate width={200} /> */}
+                        <ActivityIndicator size="large" color="#000" style={{ height: '100%' }} />
                     </View>
                     :
                     <View>
+                        <Text center h4 bold>COVID-19 : Pie Chart</Text>
+                        <Text center size={16} muted italic>Last Update: {dateFormat(date)}</Text>
                         <Picker
                             selectedValue={selectedValue}
                             style={{ height: 50, width: 300 }}
@@ -126,12 +131,11 @@ export default function Home() {
                                 return (<Picker.Item label={item} value={item} key={index} />)
                             })}
                         </Picker>
-                        <Text>Last Update: {dateFormat(date)}</Text>
                         <View>
                             {
                                 (!found) ?
                                     <View>
-                                        <Text>0 Cases</Text>
+                                        <Text center h4 bold>0 Cases</Text>
                                     </View>
                                     :
                                     <PieChart

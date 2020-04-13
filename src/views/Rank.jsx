@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
-    Text,
     View,
     Platform,
     StatusBar,
-    ScrollView
+    ScrollView,
+    Dimensions,
+    ActivityIndicator
 } from 'react-native';
 import {
     Table,
@@ -16,6 +17,8 @@ import * as Progress from 'react-native-progress'
 
 import axios from 'axios'
 
+import { Text } from 'galio-framework'
+
 export default function Rank() {
     const [confirmed, setConfirmed] = useState(0)
     const [recovered, setRecovered] = useState(0)
@@ -25,6 +28,9 @@ export default function Rank() {
     const [listCountry, setListCountry] = useState([])
     const [countryRank, setCountryRank] = useState([])
     const [loading, setLoading] = useState(false)
+
+    const widthScreen = Dimensions.get("window").width
+    const widthSetting = [0.08 * widthScreen, 0.3 * widthScreen, 0.2 * widthScreen, 0.2 * widthScreen, 0.2 * widthScreen]
 
     //COUNTRIES
     useEffect(() => {
@@ -83,11 +89,14 @@ export default function Rank() {
             result[i].push(+i + 1)
             result[i].push(sorted[i][0])
             result[i].push(sorted[i][1].confirmed.value)
-            result[i].push(sorted[i][1].recovered.value)
-            result[i].push(sorted[i][1].deaths.value)
+            // result[i].push((sorted[i][1].recovered.value))
+            // result[i].push(sorted[i][1].deaths.value)
+            result[i].push(((sorted[i][1].recovered.value/sorted[i][1].confirmed.value)*100).toFixed(2))
+            result[i].push(((sorted[i][1].deaths.value/sorted[i][1].confirmed.value)*100).toFixed(2))
         }
         return result
     }
+
     //dateFormatting
     const dateFormat = (data) => {
         let input = new Date(data)
@@ -120,20 +129,32 @@ export default function Rank() {
             {
                 (loading) ?
                     <View>
-                        <Text style={{ textAlign: "center" }}>loading, please wait...</Text>
-                        <Progress.Bar animated={true} indeterminate width={200} />
+                        {/* <Text style={{ textAlign: "center" }}>loading, please wait...</Text> */}
+                        {/* <Progress.Bar animated={true} indeterminate width={200} /> */}
+                        <ActivityIndicator size="large" color="#000" style={{ height: '100%' }} />
                     </View>
                     :
                     <View style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
-                        <Text>COVID-19</Text>
-                        <Text>Last Update: {dateFormat(date)}</Text>
-                        <Text>=======================================</Text>
+                        <Text center h4 bold>COVID-19 : Cases</Text>
+                        <Text center size={16} muted italic>Last Update: {dateFormat(date)}</Text>
                         <Table>
-                            <Row data={['', 'Global', confirmed, recovered, death]} />
+                            <Row data={['#', 'LOCATION', 'CASES', 'RECOVERED(%)', 'DEATHS(%)']} widthArr={widthSetting} style={{ height: 50, backgroundColor: '#000000' }} textStyle={{ color: '#ffffff', fontSize: 10 }} />
+                            <Row data={['', 'Worldwide', confirmed, ((recovered/confirmed)*100).toFixed(2), ((death/confirmed)*100).toFixed(2)]} widthArr={widthSetting} style={{ height: 50, backgroundColor: '#4c90d4' }} textStyle={{ color: '#ffffff', fontSize: 12 }} />
                         </Table>
                         <ScrollView>
                             <Table>
-                                <Rows data={tableData()} />
+                                {/* <Rows data={tableData()} widthArr={widthSetting} style={{ height: 50, backgroundColor: 'rgb(60,179,113)' }} textStyle={{ color: '#ffffff', fontSize: 12 }} /> */}
+                                {
+                                    tableData().map((rowData, index) => (
+                                        <Row
+                                            key={index}
+                                            data={rowData}
+                                            widthArr={widthSetting}
+                                            style={[{ height: 50, backgroundColor: 'rgb(66, 82, 114)' }, index % 2 && { backgroundColor: 'rgb(99, 107, 134)' }]}
+                                            textStyle={{ color: '#ffffff', fontSize: 12 }}
+                                        />
+                                    ))
+                                }
                             </Table>
                         </ScrollView>
 

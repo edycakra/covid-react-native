@@ -10,6 +10,7 @@ import store from './src/store/index'
 import Home from './src/views/Home'
 import Chart from './src/views/Chart'
 import Rank from './src/views/Rank'
+import News from './src/views/News'
 
 console.disableYellowBox = true;
 
@@ -29,7 +30,10 @@ const Homescreen = () => {
             iconName = focused ? 'md-list' : 'md-list';
           } else if (route.name === 'Chart') {
             iconName = focused ? 'ios-podium': 'ios-podium'
+          } else if (route.name === 'News') {
+            iconName = focused ? 'md-book': 'md-book'
           }
+
           return <Ionicons
             name={iconName}
             size={size}
@@ -47,6 +51,8 @@ const Homescreen = () => {
       <Tab.Screen name="Overview" component={Home} />
       <Tab.Screen name="List" component={Rank} />
       <Tab.Screen name="Chart" component={Chart} />
+      <Tab.Screen name="News" component={News} />
+
     </Tab.Navigator>
   )
 }
