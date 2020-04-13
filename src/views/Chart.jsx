@@ -10,7 +10,7 @@ import axios from 'axios'
 import { PieChart } from 'react-native-chart-kit'
 import * as Progress from 'react-native-progress'
 
-import { Text } from 'galio-framework'
+import { Text, Button } from 'galio-framework'
 
 export default function Chart() {
     //COUNTRIES
@@ -54,7 +54,7 @@ export default function Chart() {
         let pieData = []
         pieData.push({
             name: 'current',
-            population: cases.confirmed.value-(cases.recovered.value+cases.deaths.value),
+            population: cases.confirmed.value - (cases.recovered.value + cases.deaths.value),
             color: 'rgb(60,179,113)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
@@ -123,14 +123,17 @@ export default function Chart() {
                     <View>
                         <Text center h4 bold>COVID-19 : Pie Chart</Text>
                         <Text center size={16} muted italic>Last Update: {dateFormat(date)}</Text>
-                        <Picker
-                            selectedValue={selectedValue}
-                            style={{ height: 50, width: 300 }}
-                            onValueChange={(itemValue, itemIndex) => pickHandler(itemValue)}>
-                            {countries.map((item, index) => {
-                                return (<Picker.Item label={item} value={item} key={index} />)
-                            })}
-                        </Picker>
+                        <Button center shadowless color="rgb(66, 82, 114, 1)" style={{ width: Dimensions.get("window").width - 50 }}>
+                            <Picker
+                                selectedValue={selectedValue}
+                                textStyle={{fontSize: 20}}
+                                style={{ height: 50, width: 300 }}
+                                onValueChange={(itemValue, itemIndex) => pickHandler(itemValue)}>
+                                {countries.map((item, index) => {
+                                    return (<Picker.Item label={item} value={item} key={index} />)
+                                })}
+                            </Picker>
+                        </Button>
                         <View>
                             {
                                 (!found) ?

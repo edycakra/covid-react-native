@@ -86,7 +86,8 @@ export default function Rank() {
         let result = []
         for (let i in sorted) {
             result[i] = []
-            result[i].push(+i + 1)
+            // result[i].push(+i + 1)
+            result[i].push('')
             result[i].push(sorted[i][0])
             result[i].push(sorted[i][1].confirmed.value)
             // result[i].push((sorted[i][1].recovered.value))
@@ -151,7 +152,7 @@ export default function Rank() {
                                             data={rowData}
                                             widthArr={widthSetting}
                                             style={[{ height: 50, backgroundColor: 'rgb(66, 82, 114)' }, index % 2 && { backgroundColor: 'rgb(99, 107, 134)' }]}
-                                            textStyle={{ color: '#ffffff', fontSize: 12 }}
+                                            textStyle={{ color: '#ffffff', fontSize: 10 }}
                                         />
                                     ))
                                 }

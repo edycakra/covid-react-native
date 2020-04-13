@@ -64,7 +64,7 @@ export default function News() {
         return `${day} ${monthList[Number(month) - 1]} ${year}`
     }
 
-    const heightScreen = Dimensions.get("window").height - 200
+    const heightScreen = Dimensions.get("screen").height - 200
     const widthScreen = Dimensions.get("window").width
 
     return (
