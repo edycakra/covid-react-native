@@ -44,6 +44,7 @@ export const setGlobalLoading = (payload) => {
 
 export const fetchGlobal = () => {
     return dispatch => {
+        dispatch(setGlobalLoading(true))
         axios.get(`https://covid19.mathdro.id/api`)
         .then(({ data }) => {
             dispatch(setConfirmed(data.confirmed.value))

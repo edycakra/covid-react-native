@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux'
 import {
     StyleSheet,
     View,
     Picker,
-    Dimensions,
-    ActivityIndicator
+    Dimensions
 } from 'react-native';
 import axios from 'axios'
 import { PieChart } from 'react-native-chart-kit'
-import * as Progress from 'react-native-progress'
+import Loader from '../components/Loader'
 
 import { Text, Button } from 'galio-framework'
 
 export default function Chart() {
-    //COUNTRIES
-    const [countryLoading, setCountriesLoading] = useState(false)
-    const [countries, setCountries] = useState([])
+
+    //LIST
+    const list = useSelector(state => state.list.list)
+    const listLoading = useSelector(state => state.list.listLoading)
+
     //FIND DETAIL
-    const [loading, setLoading] = useState(false)
-    const [cases, setCases] = useState({})
-    const [countryCode, setCountryCode] = useState('Indonesia') //default
+    const [countryCodeLoading, setCountryCodeLoading] = useState(false)
+    const [cases, setCases] = useState({ confirmed: { value: 0 }, deaths: { value: 0 }, recovered: { value: 0 } })
     const [found, setFound] = useState(false)
     const [date, setDate] = useState('')
 
@@ -27,47 +28,54 @@ export default function Chart() {
     const [selectedValue, setSelectedValue] = useState('Indonesia')
 
     //FIND DETAIL
-    useEffect(() => {
-        setLoading(true)
-        axios.get(`https://covid19.mathdro.id/api/countries/${countryCode}`)
+    const getDetail = (input) => {
+        setFound(false)
+        setCountryCodeLoading(true)
+        axios.get(`https://covid19.mathdro.id/api/countries/${input}`)
             .then(({ data }) => {
                 setCases(data)
                 setFound(true)
                 setDate(data.lastUpdate)
-                getPie()
             })
             .catch(console.log)
             .finally(() => {
-                setLoading(false)
+                setCountryCodeLoading(false)
             })
-    }, [countryCode]);
+    }
+    useEffect(() => {
+        getDetail(selectedValue)
+    }, [selectedValue]);
 
     //pickHandling
     const pickHandler = (itemValue) => {
-        setLoading(true)
-        setFound(false)
-        setCountryCode(itemValue)
         setSelectedValue(itemValue)
+        setCases({ confirmed: { value: 0 }, deaths: { value: 0 }, recovered: { value: 0 } })
+        getDetail(itemValue)
     }
 
     const getPie = () => {
         let pieData = []
+        let numOfPatients = cases.confirmed.value - (cases.recovered.value + cases.deaths.value)
+        let calcCases = (100 * (numOfPatients / cases.confirmed.value)).toFixed(2)
+        let calcRecoveries = (100 * (cases.recovered.value / cases.confirmed.value)).toFixed(2)
+        let calcDeaths = (100 * (cases.deaths.value / cases.confirmed.value)).toFixed(2)
+
         pieData.push({
-            name: 'current',
-            population: cases.confirmed.value - (cases.recovered.value + cases.deaths.value),
+            name: `(${calcCases}%) patients`,
+            population: numOfPatients,
             color: 'rgb(60,179,113)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
         })
         pieData.push({
-            name: 'recovered',
+            name: `(${calcRecoveries}%) recoveries`,
             population: cases.recovered.value,
             color: 'rgb(0,191,255)',
             legendFontColor: "#7F7F7F",
             legendFontSize: 10
         })
         pieData.push({
-            name: 'deaths',
+            name: `(${calcDeaths}%) deaths`,
             population: cases.deaths.value,
             color: 'rgb(255,69,0)',
             legendFontColor: "#7F7F7F",
@@ -85,39 +93,15 @@ export default function Chart() {
         let month = ("0" + (input.getMonth() + 1)).slice(-2);
         let day = ("0" + input.getDate()).slice(-2);
 
-        let hours = ("0" + input.getHours()).slice(-2);
-        let minutes = ("0" + input.getMinutes()).slice(-2);
-
         return `${day} ${monthList[Number(month) - 1]} ${year}`
     }
-
-
-    //COUNTRIES
-    useEffect(() => {
-        setCountriesLoading(true)
-        axios.get(`https://covid19.mathdro.id/api/countries`)
-            .then(({ data }) => {
-                let countryArr = data.countries
-                let newCountryArr = []
-                countryArr.map(el => {
-                    newCountryArr.push(el.name)
-                })
-                setCountries(newCountryArr)
-            })
-            .catch(console.log)
-            .finally(() => {
-                setCountriesLoading(false)
-            })
-    }, [])
 
     return (
         <View style={styles.container}>
             {
-                (countryLoading || loading) ?
+                (listLoading || countryCodeLoading || date.length == 0) ?
                     <View>
-                        {/* <Text style={{ textAlign: "center" }}>loading, please wait...</Text> */}
-                        {/* <Progress.Bar animated={true} indeterminate width={200} /> */}
-                        <ActivityIndicator size="large" color="#000" style={{ height: '100%' }} />
+                        <Loader />
                     </View>
                     :
                     <View>
@@ -126,10 +110,10 @@ export default function Chart() {
                         <Button center shadowless color="rgb(66, 82, 114, 1)" style={{ width: Dimensions.get("window").width - 50 }}>
                             <Picker
                                 selectedValue={selectedValue}
-                                textStyle={{fontSize: 20}}
+                                textStyle={{ fontSize: 20 }}
                                 style={{ height: 50, width: 300 }}
                                 onValueChange={(itemValue, itemIndex) => pickHandler(itemValue)}>
-                                {countries.map((item, index) => {
+                                {list.map((item, index) => {
                                     return (<Picker.Item label={item} value={item} key={index} />)
                                 })}
                             </Picker>
@@ -141,25 +125,27 @@ export default function Chart() {
                                         <Text center h4 bold>0 Cases</Text>
                                     </View>
                                     :
-                                    <PieChart
-                                        data={getPie()}
-                                        width={Dimensions.get("window").width - 50}
-                                        height={220}
-                                        chartConfig={{
-                                            backgroundColor: "#000000",
-                                            backgroundGradientFrom: "#000000",
-                                            backgroundGradientTo: "#ffa726",
-                                            color: (opacity = 1) => "#ffffff",
-                                            labelColor: (opacity = 1) => "#ffffff",
-                                            style: {
-                                                borderRadius: 10
-                                            }
-                                        }}
-                                        accessor="population"
-                                        backgroundColor="#000000"
-                                        paddingLeft="15"
-                                        absolute
-                                    />
+                                    <View>
+                                        <PieChart
+                                            data={getPie()}
+                                            width={Dimensions.get("window").width - 50}
+                                            height={220}
+                                            chartConfig={{
+                                                backgroundColor: "#FFFFFF",
+                                                backgroundGradientFrom: "#000000",
+                                                backgroundGradientTo: "#ffa726",
+                                                color: (opacity = 1) => "#ffffff",
+                                                labelColor: (opacity = 1) => "#ffffff",
+                                                style: {
+                                                    borderRadius: 10
+                                                }
+                                            }}
+                                            accessor="population"
+                                            backgroundColor="#FFFFFF"
+                                            paddingLeft="15"
+                                            absolute
+                                        />
+                                    </View>
                             }
                         </View>
                     </View>

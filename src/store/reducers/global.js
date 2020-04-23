@@ -11,7 +11,7 @@ let initialState = {
     recovered: 0,
     death: 0,
     date: '',
-    globalLoading: true
+    globalLoading: false
 }
 
 export const global = (state = initialState, action) => {
@@ -19,13 +19,13 @@ export const global = (state = initialState, action) => {
         case SET_CONFIRMED:
             return { ...state, confirmed: action.payload }
         case SET_RECOVERED:
-            return { ...state, confirmed: action.payload }
+            return { ...state, recovered: action.payload }
         case SET_DEATH:
-            return { ...state, confirmed: action.payload }
+            return { ...state, death: action.payload }
         case SET_DATE:
-            return { ...state, confirmed: action.payload }
+            return { ...state, date: action.payload }
         case SET_GLOBAL_LOADING:
-            return { ...state, confirmed: action.payload }
+            return { ...state, globalLoading: action.payload }
         default:
             return state
     }

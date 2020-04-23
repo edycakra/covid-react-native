@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux'
+
 import {
     StyleSheet,
     View,
@@ -13,66 +15,71 @@ import {
     Row,
     Rows
 } from 'react-native-table-component';
-import * as Progress from 'react-native-progress'
+
+import Loader from '../components/Loader'
 
 import axios from 'axios'
 
 import { Text } from 'galio-framework'
 
 export default function Rank() {
-    const [confirmed, setConfirmed] = useState(0)
-    const [recovered, setRecovered] = useState(0)
-    const [death, setDeath] = useState(0)
-    const [date, setDate] = useState('')
 
-    const [listCountry, setListCountry] = useState([])
+    //GLOBAL DATA
+    const confirmed = useSelector(state => state.global.confirmed)
+    const recovered = useSelector(state => state.global.recovered)
+    const death = useSelector(state => state.global.death)
+    const date = useSelector(state => state.global.date)
+    const globalLoading = useSelector(state => state.global.globalLoading)
+
+    //LIST
+    const list = useSelector(state => state.list.list)
+    const listLoading = useSelector(state => state.list.listLoading)
+
+    // const [listCountry, setListCountry] = useState([])
     const [countryRank, setCountryRank] = useState([])
     const [loading, setLoading] = useState(false)
 
     const widthScreen = Dimensions.get("window").width
     const widthSetting = [0.08 * widthScreen, 0.3 * widthScreen, 0.2 * widthScreen, 0.2 * widthScreen, 0.2 * widthScreen]
 
-    //COUNTRIES
-    useEffect(() => {
+    const rankFetcher = () => {
         setLoading(true)
-        axios.get(`https://covid19.mathdro.id/api/countries`)
-            .then(({ data }) => {
-                let countryArr = data.countries
-                setListCountry(countryArr)
-                if (listCountry.length > 0) {
-                    let promises = []
-                    let countries = []
-                    for (let i in listCountry) {
-                        countries[i] = []
-                        countries[i].push(`${listCountry[i].name}`)
-                        promises.push(
-                            axios.get(`https://covid19.mathdro.id/api/countries/${listCountry[i].name}`)
-                        )
+
+        let promises = []
+        let countries = []
+        for (let i in list) {
+            countries[i] = []
+            countries[i].push(list[i])
+            promises.push(
+                axios.get(`https://covid19.mathdro.id/api/countries/${list[i]}`)
+            )
+        }
+        return Promise.all(promises.map(p => p.catch(() => undefined)))
+            .then(response => {
+                for (let i in response) {
+                    if (response[i]) {
+                        countries[i].push(response[i].data)
+                    } else {
+                        countries[i].push({
+                            'confirmed': { value: 0 },
+                            'recovered': { value: 0 },
+                            'deaths': { value: 0 }
+                        })
                     }
-                    return Promise.all(promises.map(p => p.catch(() => undefined)))
-                        .then(response => {
-                            for (let i in response) {
-                                if (response[i]) {
-                                    countries[i].push(response[i].data)
-                                } else {
-                                    countries[i].push({
-                                        'confirmed': { value: 0 },
-                                        'recovered': { value: 0 },
-                                        'deaths': { value: 0 }
-                                    })
-                                }
-                            }
-                        })
-                        .then(_ => {
-                            setCountryRank(countries)
-                        })
-                        .catch(console.log)
                 }
             })
-        if (countryRank.length > 0) {
-            setLoading(false)
-        }
-    })
+            .then(_ => {
+                setCountryRank(countries)
+            })
+            .catch(console.log)
+            .finally(() => {
+                if (countryRank.length > 0) setLoading(false)
+            })
+    }
+
+    useEffect(() => {
+        rankFetcher()
+    }, [])
 
     const sortData = (input) => {
         input.sort(function (a, b) {
@@ -82,18 +89,25 @@ export default function Rank() {
     }
 
     const tableData = () => {
-        let sorted = sortData(countryRank)
+        let sorted = (countryRank)
         let result = []
         for (let i in sorted) {
+            let countryName = sorted[i][0]
+            let confirmedValue = sorted[i][1].confirmed.value
             result[i] = []
-            // result[i].push(+i + 1)
-            result[i].push('')
-            result[i].push(sorted[i][0])
-            result[i].push(sorted[i][1].confirmed.value)
+            result[i].push(+i + 1)
+            // result[i].push('')
+            result[i].push(countryName)
+            result[i].push(confirmedValue)
             // result[i].push((sorted[i][1].recovered.value))
             // result[i].push(sorted[i][1].deaths.value)
-            result[i].push(((sorted[i][1].recovered.value/sorted[i][1].confirmed.value)*100).toFixed(2))
-            result[i].push(((sorted[i][1].deaths.value/sorted[i][1].confirmed.value)*100).toFixed(2))
+            if (confirmedValue == 0) {
+                result[i].push(0)
+                result[i].push(0)
+            } else {
+                result[i].push(((sorted[i][1].recovered.value / sorted[i][1].confirmed.value) * 100).toFixed(2))
+                result[i].push(((sorted[i][1].deaths.value / sorted[i][1].confirmed.value) * 100).toFixed(2))
+            }
         }
         return result
     }
@@ -113,34 +127,29 @@ export default function Rank() {
         return `${day} ${monthList[Number(month) - 1]} ${year} `
     }
 
-    //GLOBAL
-    useEffect(() => {
-        axios.get(`https://covid19.mathdro.id/api`)
-            .then(({ data }) => {
-                setConfirmed(data.confirmed.value)
-                setRecovered(data.recovered.value)
-                setDeath(data.deaths.value)
-                setDate(data.lastUpdate)
-            })
-            .catch(console.log)
-    }, [])
-
     return (
         <View style={styles.container}>
             {
-                (loading) ?
+                (loading || globalLoading) ?
                     <View>
-                        {/* <Text style={{ textAlign: "center" }}>loading, please wait...</Text> */}
-                        {/* <Progress.Bar animated={true} indeterminate width={200} /> */}
-                        <ActivityIndicator size="large" color="#000" style={{ height: '100%' }} />
+                        <Loader />
                     </View>
                     :
                     <View style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
                         <Text center h4 bold>COVID-19 : Cases</Text>
                         <Text center size={16} muted italic>Last Update: {dateFormat(date)}</Text>
+                        <Text>
+                            <Text size={8}>SortBy: </Text>
+                            <Text bold size={12}>
+                                <Text>Location</Text>|
+                                <Text>Cases(%)</Text>|
+                                <Text>Recoveries(%)</Text>|
+                                <Text>Deaths(%)</Text>
+                            </Text>
+                        </Text>
                         <Table>
-                            <Row data={['#', 'LOCATION', 'CASES', 'RECOVERED(%)', 'DEATHS(%)']} widthArr={widthSetting} style={{ height: 50, backgroundColor: '#000000' }} textStyle={{ color: '#ffffff', fontSize: 10 }} />
-                            <Row data={['', 'Worldwide', confirmed, ((recovered/confirmed)*100).toFixed(2), ((death/confirmed)*100).toFixed(2)]} widthArr={widthSetting} style={{ height: 50, backgroundColor: '#4c90d4' }} textStyle={{ color: '#ffffff', fontSize: 12 }} />
+                            {/* <Row data={['#', 'LOCATION', 'CASES', 'RECOVERIES(%)', 'DEATHS(%)']} widthArr={widthSetting} style={{ height: 50, backgroundColor: '#000000' }} textStyle={{ color: '#ffffff', fontSize: 8 }} /> */}
+                            <Row data={['', 'Worldwide', confirmed, ((recovered / confirmed) * 100).toFixed(2), ((death / confirmed) * 100).toFixed(2)]} widthArr={widthSetting} style={{ height: 50, backgroundColor: '#4c90d4' }} textStyle={{ color: '#ffffff', fontSize: 12 }} />
                         </Table>
                         <ScrollView>
                             <Table>

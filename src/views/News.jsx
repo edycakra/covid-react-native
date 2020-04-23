@@ -11,9 +11,9 @@ import {
     Linking
 } from 'react-native';
 import axios from 'axios'
-import * as Progress from 'react-native-progress'
+import Loader from '../components/Loader'
 
-import { Text, Accordion, Block, Card } from 'galio-framework'
+import { Text, Block } from 'galio-framework'
 import { ScrollView } from 'react-native-gesture-handler';
 
 export default function News() {
@@ -25,7 +25,6 @@ export default function News() {
         setLoading(true)
         axios.get(`http://newsapi.org/v2/top-headlines?country=us&q=corona&apiKey=9314195eaf9a4dd38cf90bd8512fcc99`)
             .then(({ data }) => {
-                // formatAccordion(data)
                 setNews(data.articles)
                 setDate(dateFormat(data.articles[0].publishedAt))
             })
@@ -35,20 +34,6 @@ export default function News() {
             })
     }, [])
 
-    // const formatAccordion = (input) => {
-    //     let value = input.articles
-    //     let newsObj = []
-    //     value.map(story => {
-    //         newsObj.push({
-    //             title: `(${story.source.name}) ${story.title}`, content: story.content, icon: {
-    //                 name: 'keyboard-arrow-down',
-    //                 family: 'material',
-    //                 size: 16,
-    //             }
-    //         })
-    //     })
-    //     setNews(newsObj)
-    // }
 
     const dateFormat = (data) => {
         let input = new Date(data)
@@ -57,9 +42,6 @@ export default function News() {
         let year = input.getFullYear();
         let month = ("0" + (input.getMonth() + 1)).slice(-2);
         let day = ("0" + input.getDate()).slice(-2);
-
-        let hours = ("0" + input.getHours()).slice(-2);
-        let minutes = ("0" + input.getMinutes()).slice(-2);
 
         return `${day} ${monthList[Number(month) - 1]} ${year}`
     }
@@ -70,11 +52,9 @@ export default function News() {
     return (
         <View style={styles.container}>
             {
-                loading ?
+                (loading || (news.length == 0)) ?
                     <View>
-                        {/* <Text style={{ textAlign: "center" }}>loading, please wait...</Text> */}
-                        {/* <Progress.Bar animated={true} indeterminate width={200} /> */}
-                        <ActivityIndicator size="large" color="#000" style={{ height: '100%' }} ></ActivityIndicator>
+                        <Loader />
                     </View>
                     :
                     <View style={{ paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
@@ -86,21 +66,21 @@ export default function News() {
                                 {
                                     news.map((story, index) => {
                                         return (
-                                        <View key={index}>
-                                            <Image
-                                                style={{ width: widthScreen, height: 0.4 * heightScreen }}
-                                                source={{ uri: story.urlToImage }}
-                                            ></Image>
-                                            <Text>
-                                                ({story.source.name}) {story.title}
-                                                <Text style={{ color: 'blue' }}
-                                                    onPress={() => Linking.openURL(story.url)}>
-                                                     > read more
+                                            <View key={index}>
+                                                <Image
+                                                    style={{ width: widthScreen, height: 0.4 * heightScreen }}
+                                                    source={{ uri: story.urlToImage }}
+                                                ></Image>
+                                                <Text>
+                                                    ({story.source.name}) {story.title}
+                                                    <Text style={{ color: 'blue' }}
+                                                        onPress={() => Linking.openURL(story.url)}>
+                                                        > read more
                                             </Text>
-                                            </Text>
-                                            <Text>
-                                            </Text>
-                                        </View>)
+                                                </Text>
+                                                <Text>
+                                                </Text>
+                                            </View>)
                                     })
                                 }
                             </ScrollView>
