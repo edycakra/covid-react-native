@@ -60,6 +60,13 @@ export default function Chart() {
         let calcRecoveries = (100 * (cases.recovered.value / cases.confirmed.value)).toFixed(2)
         let calcDeaths = (100 * (cases.deaths.value / cases.confirmed.value)).toFixed(2)
 
+        if (cases.confirmed.value == 0) {
+            numOfPatients = 0
+            calcCases = 0
+            calcRecoveries = 0
+            calcDeaths = 0
+        }
+
         pieData.push({
             name: `(${calcCases}%) patients`,
             population: numOfPatients,

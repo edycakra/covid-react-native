@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
     View,
-    Picker,
     Dimensions,
     Platform,
     StatusBar,
-    ActivityIndicator,
     Image,
     Linking
 } from 'react-native';
@@ -61,7 +59,6 @@ export default function News() {
                         <Text center h4 bold>COVID-19 : News</Text>
                         <Text center size={16} muted italic>Last Update: {dateFormat(date)}</Text>
                         <Block card fluid style={{ height: heightScreen }}>
-                            {/* <Accordion dataArray={news} /> */}
                             <ScrollView>
                                 {
                                     news.map((story, index) => {
@@ -73,11 +70,11 @@ export default function News() {
                                                 ></Image>
                                                 <Text>
                                                     ({story.source.name}) {story.title}
-                                                    <Text style={{ color: 'blue' }}
-                                                        onPress={() => Linking.openURL(story.url)}>
-                                                        > read more
-                                            </Text>
                                                 </Text>
+                                                <Text style={{ color: 'blue' }}
+                                                    onPress={() => Linking.openURL(story.url)}>
+                                                    > read more
+                                                    </Text>
                                                 <Text>
                                                 </Text>
                                             </View>)
@@ -87,7 +84,6 @@ export default function News() {
                         </Block>
                     </View>
             }
-
         </View >
     );
 }

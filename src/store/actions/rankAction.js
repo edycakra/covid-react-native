@@ -68,3 +68,86 @@ export const fetchRank = () => {
         }
     }
 }
+
+    //   //COUNTRIES
+    //   useEffect(() => {
+    //     setLoading(true)
+    //     axios.get(`https://covid19.mathdro.id/api/countries`)
+    //         .then(({ data }) => {
+    //             let countryArr = data.countries
+    //             setListCountry(countryArr)
+    //             if (listCountry.length > 0) {
+    //                 let promises = []
+    //                 let countries = []
+    //                 for (let i in listCountry) {
+    //                     countries[i] = []
+    //                     countries[i].push(`${listCountry[i].name}`)
+    //                     promises.push(
+    //                         axios.get(`https://covid19.mathdro.id/api/countries/${listCountry[i].name}`)
+    //                     )
+    //                 }
+    //                 return Promise.all(promises.map(p => p.catch(() => undefined)))
+    //                     .then(response => {
+    //                         for (let i in response) {
+    //                             if (response[i]) {
+    //                                 countries[i].push(response[i].data)
+    //                             } else {
+    //                                 countries[i].push({
+    //                                     'confirmed': { value: 0 },
+    //                                     'recovered': { value: 0 },
+    //                                     'deaths': { value: 0 }
+    //                                 })
+    //                             }
+    //                         }
+    //                     })
+    //                     .then(_ => {
+    //                         setCountryRank(countries)
+    //                     })
+    //                     .catch(console.log)
+    //             }
+    //         })
+    //     if (countryRank.length > 0) {
+    //         setLoading(false)
+    //     }
+    // })
+
+        // const rankFetcher = () => {
+    //     if (list.length > 0) {
+    //         setLoading(true)
+
+    //         let promises = []
+    //         let countries = []
+    //         for (let i in list) {
+    //             countries[i] = []
+    //             countries[i].push(list[i])
+    //             promises.push(
+    //                 axios.get(`https://covid19.mathdro.id/api/countries/${list[i]}`)
+    //             )
+    //         }
+    //         Promise.all(promises.map(p => p.catch(() => undefined)))
+    //             .then(response => {
+    //                 for (let i in response) {
+    //                     if (response[i]) {
+    //                         countries[i].push(response[i].data)
+    //                     } else {
+    //                         countries[i].push({
+    //                             'confirmed': { value: 0 },
+    //                             'recovered': { value: 0 },
+    //                             'deaths': { value: 0 }
+    //                         })
+    //                     }
+    //                 }
+    //             })
+    //             .then(_ => {
+    //                 setCountryRank(countries)
+    //             })
+    //             .catch(console.log)
+    //             .finally(() => {
+    //                 if (countryRank.length > 0) setLoading(false)
+    //             })
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     rankFetcher()
+    // }, [])
